@@ -1,6 +1,7 @@
 /* 
  * Student Grade and Result Analyzer
  * Simple C Project for 1st Year B.Tech Students
+ * Features: Add, View Marksheet, Topper, Subject Average, Delete, File Save
  */
 
 #include <stdio.h>
@@ -15,72 +16,125 @@ struct Student {
     char grade;
 };
 
+// Function to save student array to a text file
+void saveToFile(struct Student s[], int n) {
+    FILE *fp = fopen("students.txt", "w");
+    if (fp == NULL) {
+        printf("Error opening file for saving!\n");
+        return;
+    }
+
+    for (int i = 0; i < n; i++) {
+        fprintf(fp, "%d %s %.1f %.1f %.1f\n",
+                s[i].roll, s[i].name, s[i].marks[0], s[i].marks[1], s[i].marks[2]);
+    }
+
+    fclose(fp);
+}
+
 int main() {
-    struct Student s[50];
-    int n = 0;
+    struct Student s[100];
+    int n = 0;          // Total number of students currently stored
     int choice;
     int i, j;
+
+    // Load previously saved students from file on program start
+    FILE *fp = fopen("students.txt", "r");
+    if (fp != NULL) {
+        while (fscanf(fp, "%d %s %f %f %f",
+                      &s[n].roll, s[n].name,
+                      &s[n].marks[0], &s[n].marks[1], &s[n].marks[2]) == 5) {
+            
+            // Calculate total, percentage, and grade for each loaded student
+            s[n].total = s[n].marks[0] + s[n].marks[1] + s[n].marks[2];
+            s[n].percentage = s[n].total / 3.0;
+
+            if (s[n].percentage >= 90) {
+                s[n].grade = 'A';
+            } else if (s[n].percentage >= 75) {
+                s[n].grade = 'B';
+            } else if (s[n].percentage >= 60) {
+                s[n].grade = 'C';
+            } else if (s[n].percentage >= 40) {
+                s[n].grade = 'D';
+            } else {
+                s[n].grade = 'F';
+            }
+
+            n++;
+        }
+        fclose(fp);
+        if (n > 0) {
+            printf("\n--> Loaded %d existing student record(s) from 'students.txt'.\n", n);
+        }
+    }
 
     while (1) {
         printf("\n=================================\n");
         printf("  STUDENT GRADE & RESULT ANALYZER\n");
         printf("=================================\n");
-        printf("1. Enter Student Details\n");
+        printf("1. Add New Student(s)\n");
         printf("2. Display Marksheet Table\n");
         printf("3. Find Class Topper\n");
         printf("4. Subject-wise Average Marks\n");
-        printf("5. Exit\n");
+        printf("5. Delete a Student Record\n");
+        printf("6. Exit\n");
         printf("---------------------------------\n");
-        printf("Enter your choice (1-5): ");
+        printf("Enter your choice (1-6): ");
         scanf("%d", &choice);
 
-        // 1. Input student details
+        // 1. Add students (appends to existing data)
         if (choice == 1) {
-            printf("\nHow many students do you want to enter? ");
-            scanf("%d", &n);
+            int count;
+            printf("\nHow many students do you want to add? ");
+            scanf("%d", &count);
 
-            for (i = 0; i < n; i++) {
-                printf("\n--- Student %d ---\n", i + 1);
+            for (i = 0; i < count; i++) {
+                printf("\n--- Student %d ---\n", n + 1);
                 printf("Enter Roll Number: ");
-                scanf("%d", &s[i].roll);
+                scanf("%d", &s[n].roll);
 
                 printf("Enter Name (single word): ");
-                scanf("%s", s[i].name);
+                scanf("%s", s[n].name);
 
-                s[i].total = 0;
                 printf("Enter marks for 3 subjects (out of 100):\n");
                 printf("  1. Mathematics : ");
-                scanf("%f", &s[i].marks[0]);
+                scanf("%f", &s[n].marks[0]);
                 printf("  2. Physics     : ");
-                scanf("%f", &s[i].marks[1]);
+                scanf("%f", &s[n].marks[1]);
                 printf("  3. C Language  : ");
-                scanf("%f", &s[i].marks[2]);
+                scanf("%f", &s[n].marks[2]);
 
                 // Calculate total and percentage
-                s[i].total = s[i].marks[0] + s[i].marks[1] + s[i].marks[2];
-                s[i].percentage = s[i].total / 3.0;
+                s[n].total = s[n].marks[0] + s[n].marks[1] + s[n].marks[2];
+                s[n].percentage = s[n].total / 3.0;
 
-                // Simple grade calculation
-                if (s[i].percentage >= 90) {
-                    s[i].grade = 'A';
-                } else if (s[i].percentage >= 75) {
-                    s[i].grade = 'B';
-                } else if (s[i].percentage >= 60) {
-                    s[i].grade = 'C';
-                } else if (s[i].percentage >= 40) {
-                    s[i].grade = 'D';
+                // Grade calculation
+                if (s[n].percentage >= 90) {
+                    s[n].grade = 'A';
+                } else if (s[n].percentage >= 75) {
+                    s[n].grade = 'B';
+                } else if (s[n].percentage >= 60) {
+                    s[n].grade = 'C';
+                } else if (s[n].percentage >= 40) {
+                    s[n].grade = 'D';
                 } else {
-                    s[i].grade = 'F';
+                    s[n].grade = 'F';
                 }
 
+                n++; // Increase student count
                 printf("Student added successfully!\n");
             }
+
+            // Save to file automatically after adding
+            saveToFile(s, n);
+            printf("--> All data saved to 'students.txt'!\n");
         }
 
         // 2. Display all results in a marksheet table
         else if (choice == 2) {
             if (n == 0) {
-                printf("\nNo data found! Please enter student details first (Option 1).\n");
+                printf("\nNo student records found! Please add students first.\n");
             } else {
                 printf("\n--------------------------------------------------------------------\n");
                 printf("Roll\tName\t\tMaths\tPhy\tC-Lang\tTotal\t%%\tGrade\n");
@@ -91,13 +145,14 @@ int main() {
                            s[i].marks[2], s[i].total, s[i].percentage, s[i].grade);
                 }
                 printf("--------------------------------------------------------------------\n");
+                printf("Total Students: %d\n", n);
             }
         }
 
         // 3. Find class topper
         else if (choice == 3) {
             if (n == 0) {
-                printf("\nNo data found! Please enter student details first.\n");
+                printf("\nNo data found! Please add students first.\n");
             } else {
                 int topper = 0;
                 for (i = 1; i < n; i++) {
@@ -134,15 +189,52 @@ int main() {
             }
         }
 
-        // 5. Exit
+        // 5. Delete a student record by Roll Number
         else if (choice == 5) {
+            if (n == 0) {
+                printf("\nNo records available to delete!\n");
+            } else {
+                int delRoll;
+                int found = 0;
+
+                printf("\nEnter Roll Number of student to delete: ");
+                scanf("%d", &delRoll);
+
+                for (i = 0; i < n; i++) {
+                    if (s[i].roll == delRoll) {
+                        found = 1;
+
+                        // Shift all remaining students one step to the left
+                        for (j = i; j < n - 1; j++) {
+                            s[j] = s[j + 1];
+                        }
+
+                        n--; // Decrease student count
+
+                        // Save updated array to file
+                        saveToFile(s, n);
+
+                        printf("Student with Roll Number %d deleted successfully!\n", delRoll);
+                        printf("--> Updated records saved to 'students.txt'.\n");
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    printf("Student with Roll Number %d not found!\n", delRoll);
+                }
+            }
+        }
+
+        // 6. Exit
+        else if (choice == 6) {
             printf("\nExiting program. Thank you!\n");
             break;
         }
 
         // Invalid choice
         else {
-            printf("\nInvalid choice! Please enter a number from 1 to 5.\n");
+            printf("\nInvalid choice! Please enter a number from 1 to 6.\n");
         }
     }
 
