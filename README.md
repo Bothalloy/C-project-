@@ -1,55 +1,62 @@
-# Student Grade and Result Analyzer (C Language)
+# Student Grade Analyzer
 
-A complete, beginner-friendly **Student Grade and Result Analyzer** created in **pure C** for first-year B.Tech / engineering students.
+A simple, menu-driven *Student Grade Analyzer* written in basic 1st-semester C. It stores up to 100 student records in memory, validates SAP IDs and subject marks, calculates totals/percentages/grades, and generates rankings and class statistics.
 
----
+## Features
 
-## 📌 Project Overview
-This project is designed as an introductory C mini-project. It helps faculty and students manage semester marks, calculate percentages and grades, identify class toppers, evaluate subject-wise performance (highest, lowest, average, pass rate), and save records persistently to a file.
+1.⁠ ⁠*Add Student*
+   - Validates 9-digit *SAP IDs* starting with ⁠ 5900 ⁠ (⁠ 590000000 ⁠–⁠ 590099999 ⁠, e.g., ⁠ 590032680 ⁠).
+   - Prevents duplicate SAP IDs.
+   - Accepts marks (⁠ 0 ⁠–⁠ 100 ⁠) for 5 subjects: *Maths, **Physics, **Chemistry, **English, and **Computer*.
+   - Automatically calculates *Total, **Percentage, and **Grade*.
 
----
+2.⁠ ⁠*Display All Students*
+   - Prints a table with *SAP ID, **Name, **Total, **Percent, **Grade, and **Result* (⁠ PASS ⁠ / ⁠ FAIL ⁠).
 
-## 🚀 Key Features
+3.⁠ ⁠*Search by SAP ID*
+   - Finds a student using linear search (⁠ findSap ⁠) and displays their Total, Percentage, and Grade.
 
-1. **Add Students**: Add single or multiple students with validation (duplicate roll number check, marks range 0–100).
-2. **Display All Marksheets**: Displays a neat tabular report showing roll number, student name, marks in 5 subjects, total, percentage, grade, and pass/fail status.
-3. **Search by Roll Number**: Quickly find and print an individual student's detailed report card.
-4. **Class Topper**: Automatically identifies the student with the highest percentage.
-5. **Subject-Wise Analysis**: Computes the highest score, lowest score, average score, and pass percentage for every individual subject.
-6. **Overall Class Performance**: Generates a summary report with class average, pass/fail percentage, and grade distribution (A+, A, B, C, D, E, F).
-7. **File Persistence**: Automatically saves records to `students_records.txt` and reloads them when the application starts.
+4.⁠ ⁠*Rank & Class Summary*
+   - Sorts students in descending order of percentage using *Bubble Sort* to display a *Rank List*.
+   - Shows *Class Average, **Topper, **Lowest* scorer, and *Passed* count (⁠ X/Y ⁠).
+   - Prints a ⁠ * ⁠ *Grade Chart* for grades ⁠ A ⁠–⁠ F ⁠.
+   - Prints a *Failing List* for students scoring below ⁠ 40% ⁠ (grade ⁠ F ⁠).
 
----
+5.⁠ ⁠*Delete Student*
+   - Removes a student record by SAP ID and shifts the remaining array elements.
 
-## 📚 1st Year Engineering Subjects Included
-- Mathematics
-- Physics
-- Basic Electrical
-- Programming in C
-- English
+## Grading Scale
 
----
+| Percentage | Grade | Result |
+| :--- | :---: | :---: |
+| ⁠ 90% – 100% ⁠ | A | PASS |
+| ⁠ 75% – 89.99% ⁠ | B | PASS |
+| ⁠ 60% – 74.99% ⁠ | C | PASS |
+| ⁠ 40% – 59.99% ⁠ | D | PASS |
+| ⁠ Below 40% ⁠ | F | FAIL |
 
-## 🎯 Grading System
-- **Minimum Passing Marks**: 40 marks per subject. If a student scores less than 40 in any subject, they are declared **FAIL** with grade **F**.
-- **Grade Scale (for Passed Students)**:
-  - **A+** : $\ge 90\%$
-  - **A**  : $80\% - 89.99\%$
-  - **B**  : $70\% - 79.99\%$
-  - **C**  : $60\% - 69.99\%$
-  - **D**  : $50\% - 59.99\%$
-  - **E**  : $40\% - 49.99\%$
-  - **F**  : $< 40\%$ or failed in any subject
+## C Concepts Used
 
----
+•⁠  ⁠⁠ struct ⁠ (⁠ struct Student ⁠)
+•⁠  ⁠1D & 2D arrays (⁠ st[100] ⁠, ⁠ marks[5] ⁠, ⁠ subjects[5][15] ⁠)
+•⁠  ⁠Functions (⁠ findSap ⁠, ⁠ addStudent ⁠, ⁠ displayAll ⁠, ⁠ searchStudent ⁠, ⁠ deleteStudent ⁠, ⁠ rankAndSummary ⁠, ⁠ main ⁠)
+•⁠  ⁠Loops (⁠ for ⁠, ⁠ do-while ⁠) and conditionals (⁠ if / else if / else ⁠, ⁠ switch ⁠)
+•⁠  ⁠Basic algorithms: *Linear Search* and *Bubble Sort*
 
-## 🛠️ Concepts of C Used
-This project uses standard first-year C programming concepts:
-1. **Structures (`struct Student`)**: Groups multiple attributes (roll number, name, marks array, total, grade) into one user-defined data type.
-2. **Arrays**: 1D arrays for subject marks and array of structures (`students[MAX_STUDENTS]`).
-3. **Functions & Pointers**: Pass-by-reference (`struct Student *s`) for modifying student records and pass-by-value/array pointers for display.
-4. **Loops & Decision Making**: `do-while`, `for`, `if-else`, and `switch-case` for menu-driven flow.
-5. **String Handling**: `<string.h>` functions like `strcpy()` and `strcmp()`.
-6. **File I/O (`<stdio.h>`)**: File pointers (`FILE *`), `fopen()`, `fprintf()`, `fscanf()`, and `fclose()`.
+## How to Compile and Run
 
----
+Using GCC on Windows:
+
+⁠ powershell
+gcc main.c -o main.exe
+.\main.exe
+ ⁠
+
+On Linux / macOS:
+
+⁠ bash
+gcc main.c -o main
+./main
+ ⁠
+
+	⁠*Note:* Enter single-word names (first name only, without spaces) when adding a student, as ⁠ scanf("%s", s.name) ⁠ is used.
