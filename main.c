@@ -1,243 +1,203 @@
-/* 
- * Student Grade and Result Analyzer
- * Simple C Project for 1st Year B.Tech Students
- * Features: Add, View Marksheet, Topper, Subject Average, Delete, File Save
- */
-
 #include <stdio.h>
 
-// Structure to store student data
 struct Student {
-    long long sapid;    // Student SAP ID (e.g., 500012345)
-    char name[30];
-    float marks[3];     // 3 subjects: Maths, Physics, C Programming
+    long sap;
+    char name[50];
+    float marks[5];
     float total;
-    float percentage;
+    float percent;
     char grade;
 };
 
-// Function to save student array to a text file
-void saveToFile(struct Student s[], int n) {
-    FILE *fp = fopen("students.txt", "w");
-    if (fp == NULL) {
-        printf("Error opening file for saving!\n");
+struct Student st[100];
+int n = 0;
+char subjects[5][15] = {"Maths", "Physics", "Chemistry", "English", "Computer"};
+
+void addStudent() {
+    struct Student s;
+    int i;
+    if (n >= 100) {
+        printf("List is full!\n");
+        return;
+    }
+    s.total = 0;
+
+    do {
+        printf("Enter SAP ID (e.g. 590032680): ");
+        scanf("%ld", &s.sap);
+        if (s.sap < 590000000 || s.sap > 590099999) {
+            printf("Invalid SAP ID! Must start with 5900 and have 5 more digits.\n");
+        }
+    } while (s.sap < 590000000 || s.sap > 590099999);
+
+    for (i = 0; i < n; i++) {
+        if (st[i].sap == s.sap) {
+            printf("SAP ID already exists!\n");
+            return;
+        }
+    }
+
+    printf("Enter first name: ");
+    scanf("%s", s.name);
+
+    for (i = 0; i < 5; i++) {
+        do {
+            printf("Marks in %s (0-100): ", subjects[i]);
+            scanf("%f", &s.marks[i]);
+        } while (s.marks[i] < 0 || s.marks[i] > 100);
+        s.total = s.total + s.marks[i];
+    }
+
+    s.percent = s.total / 5;
+
+    if (s.percent >= 90)
+        s.grade = 'A';
+    else if (s.percent >= 75)
+        s.grade = 'B';
+    else if (s.percent >= 60)
+        s.grade = 'C';
+    else if (s.percent >= 40)
+        s.grade = 'D';
+    else
+        s.grade = 'F';
+
+    st[n] = s;
+    n++;
+    printf("Added! Percentage: %.2f%%, Grade: %c\n", s.percent, s.grade);
+}
+
+void displayAll() {
+    int i;
+    if (n == 0) {
+        printf("No records found.\n");
+        return;
+    }
+    printf("\nSAP ID\t\tName\tTotal\tPercent\tGrade\tResult\n");
+    for (i = 0; i < n; i++) {
+        printf("%ld\t%s\t%.1f\t%.2f%%\t%c\t",
+               st[i].sap, st[i].name, st[i].total, st[i].percent, st[i].grade);
+        if (st[i].grade == 'F')
+            printf("FAIL\n");
+        else
+            printf("PASS\n");
+    }
+}
+
+void searchStudent() {
+    long id;
+    int i;
+    printf("Enter SAP ID: ");
+    scanf("%ld", &id);
+
+    for (i = 0; i < n; i++) {
+        if (st[i].sap == id) {
+            printf("Found: %s | Total: %.1f | Percent: %.2f%% | Grade: %c\n",
+                   st[i].name, st[i].total, st[i].percent, st[i].grade);
+            return;
+        }
+    }
+    printf("Student not found.\n");
+}
+
+void deleteStudent() {
+    long id;
+    int i, j;
+    printf("Enter SAP ID to delete: ");
+    scanf("%ld", &id);
+
+    for (i = 0; i < n; i++) {
+        if (st[i].sap == id) {
+            for (j = i; j < n - 1; j++)
+                st[j] = st[j + 1];
+            n--;
+            printf("Record deleted.\n");
+            return;
+        }
+    }
+    printf("Student not found.\n");
+}
+
+void rankAndSummary() {
+    int i, j, pass = 0;
+    int gradeCount[5] = {0};
+    char grades[5] = {'A', 'B', 'C', 'D', 'F'};
+    float sum = 0;
+    struct Student temp;
+
+    if (n == 0) {
+        printf("No records found.\n");
         return;
     }
 
-    for (int i = 0; i < n; i++) {
-        fprintf(fp, "%lld %s %.1f %.1f %.1f\n",
-                s[i].sapid, s[i].name, s[i].marks[0], s[i].marks[1], s[i].marks[2]);
+    for (i = 0; i < n - 1; i++) {
+        for (j = 0; j < n - i - 1; j++) {
+            if (st[j].percent < st[j + 1].percent) {
+                temp = st[j];
+                st[j] = st[j + 1];
+                st[j + 1] = temp;
+            }
+        }
     }
 
-    fclose(fp);
+    printf("\n--- Rank List ---\n");
+    for (i = 0; i < n; i++) {
+        printf("%d. %s (SAP ID: %ld) - %.2f%% [%c]\n",
+               i + 1, st[i].name, st[i].sap, st[i].percent, st[i].grade);
+        sum = sum + st[i].percent;
+        if (st[i].grade != 'F')
+            pass++;
+
+        switch (st[i].grade) {
+            case 'A': gradeCount[0]++; break;
+            case 'B': gradeCount[1]++; break;
+            case 'C': gradeCount[2]++; break;
+            case 'D': gradeCount[3]++; break;
+            default:  gradeCount[4]++; break;
+        }
+    }
+
+    printf("\nClass Average: %.2f%%\n", sum / n);
+    printf("Topper: %s (%.2f%%)\n", st[0].name, st[0].percent);
+    printf("Lowest: %s (%.2f%%)\n", st[n - 1].name, st[n - 1].percent);
+    printf("Passed: %d out of %d\n", pass, n);
+
+    printf("\nGrade Chart:\n");
+    for (i = 0; i < 5; i++) {
+        printf("%c | ", grades[i]);
+        for (j = 0; j < gradeCount[i]; j++)
+            printf("*");
+        printf(" (%d)\n", gradeCount[i]);
+    }
+
+    printf("\nFailing List (below 40%%):\n");
+    if (pass == n) {
+        printf("None!\n");
+    } else {
+        for (i = 0; i < n; i++) {
+            if (st[i].grade == 'F')
+                printf("- %s (SAP ID: %ld): %.2f%%\n", st[i].name, st[i].sap, st[i].percent);
+        }
+    }
 }
 
 int main() {
-    struct Student s[100];
-    int n = 0;          // Total number of students currently stored
     int choice;
-    int i, j;
 
-    // Load previously saved students from file on program start
-    FILE *fp = fopen("students.txt", "r");
-    if (fp != NULL) {
-        while (fscanf(fp, "%lld %s %f %f %f",
-                      &s[n].sapid, s[n].name,
-                      &s[n].marks[0], &s[n].marks[1], &s[n].marks[2]) == 5) {
-            
-            // Calculate total, percentage, and grade for each loaded student
-            s[n].total = s[n].marks[0] + s[n].marks[1] + s[n].marks[2];
-            s[n].percentage = s[n].total / 3.0;
-
-            if (s[n].percentage >= 90) {
-                s[n].grade = 'A';
-            } else if (s[n].percentage >= 75) {
-                s[n].grade = 'B';
-            } else if (s[n].percentage >= 60) {
-                s[n].grade = 'C';
-            } else if (s[n].percentage >= 40) {
-                s[n].grade = 'D';
-            } else {
-                s[n].grade = 'F';
-            }
-
-            n++;
-        }
-        fclose(fp);
-        if (n > 0) {
-            printf("\n--> Loaded %d existing student record(s) from 'students.txt'.\n", n);
-        }
-    }
-
-    while (1) {
-        printf("\n=================================\n");
-        printf("  STUDENT GRADE & RESULT ANALYZER\n");
-        printf("=================================\n");
-        printf("1. Add New Student(s)\n");
-        printf("2. Display Marksheet Table\n");
-        printf("3. Find Class Topper\n");
-        printf("4. Subject-wise Average Marks\n");
-        printf("5. Delete a Student Record\n");
-        printf("6. Exit\n");
-        printf("---------------------------------\n");
-        printf("Enter your choice (1-6): ");
+    do {
+        printf("\n1. Add Student\n2. Display All\n3. Search\n4. Rank & Summary\n5. Delete Student\n6. Exit\n");
+        printf("Enter choice: ");
         scanf("%d", &choice);
 
-        // 1. Add students (appends to existing data)
-        if (choice == 1) {
-            int count;
-            printf("\nHow many students do you want to add? ");
-            scanf("%d", &count);
-
-            for (i = 0; i < count; i++) {
-                printf("\n--- Student %d ---\n", n + 1);
-                printf("Enter SAP ID: ");
-                scanf("%lld", &s[n].sapid);
-
-                printf("Enter Name (single word): ");
-                scanf("%s", s[n].name);
-
-                printf("Enter marks for 3 subjects (out of 100):\n");
-                printf("  1. Mathematics : ");
-                scanf("%f", &s[n].marks[0]);
-                printf("  2. Physics     : ");
-                scanf("%f", &s[n].marks[1]);
-                printf("  3. C Language  : ");
-                scanf("%f", &s[n].marks[2]);
-
-                // Calculate total and percentage
-                s[n].total = s[n].marks[0] + s[n].marks[1] + s[n].marks[2];
-                s[n].percentage = s[n].total / 3.0;
-
-                // Grade calculation
-                if (s[n].percentage >= 90) {
-                    s[n].grade = 'A';
-                } else if (s[n].percentage >= 75) {
-                    s[n].grade = 'B';
-                } else if (s[n].percentage >= 60) {
-                    s[n].grade = 'C';
-                } else if (s[n].percentage >= 40) {
-                    s[n].grade = 'D';
-                } else {
-                    s[n].grade = 'F';
-                }
-
-                n++; // Increase student count
-                printf("Student added successfully!\n");
-            }
-
-            // Save to file automatically after adding
-            saveToFile(s, n);
-            printf("--> All data saved to 'students.txt'!\n");
+        switch (choice) {
+            case 1: addStudent(); break;
+            case 2: displayAll(); break;
+            case 3: searchStudent(); break;
+            case 4: rankAndSummary(); break;
+            case 5: deleteStudent(); break;
+            case 6: printf("Goodbye!\n"); break;
+            default: printf("Invalid choice!\n");
         }
-
-        // 2. Display all results in a marksheet table
-        else if (choice == 2) {
-            if (n == 0) {
-                printf("\nNo student records found! Please add students first.\n");
-            } else {
-                printf("\n----------------------------------------------------------------------------\n");
-                printf("%-12s %-12s %-8s %-8s %-8s %-8s %-8s %-5s\n",
-                       "SAP ID", "Name", "Maths", "Phy", "C-Lang", "Total", "%age", "Grade");
-                printf("----------------------------------------------------------------------------\n");
-                for (i = 0; i < n; i++) {
-                    printf("%-12lld %-12s %-8.1f %-8.1f %-8.1f %-8.1f %-8.1f %-5c\n",
-                           s[i].sapid, s[i].name, s[i].marks[0], s[i].marks[1],
-                           s[i].marks[2], s[i].total, s[i].percentage, s[i].grade);
-                }
-                printf("----------------------------------------------------------------------------\n");
-                printf("Total Students: %d\n", n);
-            }
-        }
-
-        // 3. Find class topper
-        else if (choice == 3) {
-            if (n == 0) {
-                printf("\nNo data found! Please add students first.\n");
-            } else {
-                int topper = 0;
-                for (i = 1; i < n; i++) {
-                    if (s[i].percentage > s[topper].percentage) {
-                        topper = i;
-                    }
-                }
-
-                printf("\n********* CLASS TOPPER *********\n");
-                printf("SAP ID      : %lld\n", s[topper].sapid);
-                printf("Name        : %s\n", s[topper].name);
-                printf("Total Marks : %.1f / 300\n", s[topper].total);
-                printf("Percentage  : %.2f%%\n", s[topper].percentage);
-                printf("Grade       : %c\n", s[topper].grade);
-                printf("********************************\n");
-            }
-        }
-
-        // 4. Subject-wise average analysis
-        else if (choice == 4) {
-            if (n == 0) {
-                printf("\nNo data found! Please enter student details first.\n");
-            } else {
-                char subjects[3][20] = {"Mathematics", "Physics", "C Language"};
-
-                printf("\n--- SUBJECT-WISE AVERAGE MARKS ---\n");
-                for (j = 0; j < 3; j++) {
-                    float sum = 0;
-                    for (i = 0; i < n; i++) {
-                        sum += s[i].marks[j];
-                    }
-                    printf("%-15s Average : %.2f / 100\n", subjects[j], sum / n);
-                }
-            }
-        }
-
-        // 5. Delete a student record by SAP ID
-        else if (choice == 5) {
-            if (n == 0) {
-                printf("\nNo records available to delete!\n");
-            } else {
-                long long delSapid;
-                int found = 0;
-
-                printf("\nEnter SAP ID of student to delete: ");
-                scanf("%lld", &delSapid);
-
-                for (i = 0; i < n; i++) {
-                    if (s[i].sapid == delSapid) {
-                        found = 1;
-
-                        // Shift all remaining students one step to the left
-                        for (j = i; j < n - 1; j++) {
-                            s[j] = s[j + 1];
-                        }
-
-                        n--; // Decrease student count
-
-                        // Save updated array to file
-                        saveToFile(s, n);
-
-                        printf("Student with SAP ID %lld deleted successfully!\n", delSapid);
-                        printf("--> Updated records saved to 'students.txt'.\n");
-                        break;
-                    }
-                }
-
-                if (!found) {
-                    printf("Student with SAP ID %lld not found!\n", delSapid);
-                }
-            }
-        }
-
-        // 6. Exit
-        else if (choice == 6) {
-            printf("\nExiting program. Thank you!\n");
-            break;
-        }
-
-        // Invalid choice
-        else {
-            printf("\nInvalid choice! Please enter a number from 1 to 6.\n");
-        }
-    }
+    } while (choice != 6);
 
     return 0;
 }
