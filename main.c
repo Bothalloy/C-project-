@@ -8,7 +8,7 @@
 
 // Structure to store student data
 struct Student {
-    int roll;
+    long long sapid;    // Student SAP ID (e.g., 500012345)
     char name[30];
     float marks[3];     // 3 subjects: Maths, Physics, C Programming
     float total;
@@ -25,8 +25,8 @@ void saveToFile(struct Student s[], int n) {
     }
 
     for (int i = 0; i < n; i++) {
-        fprintf(fp, "%d %s %.1f %.1f %.1f\n",
-                s[i].roll, s[i].name, s[i].marks[0], s[i].marks[1], s[i].marks[2]);
+        fprintf(fp, "%lld %s %.1f %.1f %.1f\n",
+                s[i].sapid, s[i].name, s[i].marks[0], s[i].marks[1], s[i].marks[2]);
     }
 
     fclose(fp);
@@ -41,8 +41,8 @@ int main() {
     // Load previously saved students from file on program start
     FILE *fp = fopen("students.txt", "r");
     if (fp != NULL) {
-        while (fscanf(fp, "%d %s %f %f %f",
-                      &s[n].roll, s[n].name,
+        while (fscanf(fp, "%lld %s %f %f %f",
+                      &s[n].sapid, s[n].name,
                       &s[n].marks[0], &s[n].marks[1], &s[n].marks[2]) == 5) {
             
             // Calculate total, percentage, and grade for each loaded student
@@ -91,8 +91,8 @@ int main() {
 
             for (i = 0; i < count; i++) {
                 printf("\n--- Student %d ---\n", n + 1);
-                printf("Enter Roll Number: ");
-                scanf("%d", &s[n].roll);
+                printf("Enter SAP ID: ");
+                scanf("%lld", &s[n].sapid);
 
                 printf("Enter Name (single word): ");
                 scanf("%s", s[n].name);
@@ -136,15 +136,16 @@ int main() {
             if (n == 0) {
                 printf("\nNo student records found! Please add students first.\n");
             } else {
-                printf("\n--------------------------------------------------------------------\n");
-                printf("Roll\tName\t\tMaths\tPhy\tC-Lang\tTotal\t%%\tGrade\n");
-                printf("--------------------------------------------------------------------\n");
+                printf("\n----------------------------------------------------------------------------\n");
+                printf("%-12s %-12s %-8s %-8s %-8s %-8s %-8s %-5s\n",
+                       "SAP ID", "Name", "Maths", "Phy", "C-Lang", "Total", "%age", "Grade");
+                printf("----------------------------------------------------------------------------\n");
                 for (i = 0; i < n; i++) {
-                    printf("%d\t%-10s\t%.1f\t%.1f\t%.1f\t%.1f\t%.1f\t%c\n",
-                           s[i].roll, s[i].name, s[i].marks[0], s[i].marks[1],
+                    printf("%-12lld %-12s %-8.1f %-8.1f %-8.1f %-8.1f %-8.1f %-5c\n",
+                           s[i].sapid, s[i].name, s[i].marks[0], s[i].marks[1],
                            s[i].marks[2], s[i].total, s[i].percentage, s[i].grade);
                 }
-                printf("--------------------------------------------------------------------\n");
+                printf("----------------------------------------------------------------------------\n");
                 printf("Total Students: %d\n", n);
             }
         }
@@ -162,7 +163,7 @@ int main() {
                 }
 
                 printf("\n********* CLASS TOPPER *********\n");
-                printf("Roll Number : %d\n", s[topper].roll);
+                printf("SAP ID      : %lld\n", s[topper].sapid);
                 printf("Name        : %s\n", s[topper].name);
                 printf("Total Marks : %.1f / 300\n", s[topper].total);
                 printf("Percentage  : %.2f%%\n", s[topper].percentage);
@@ -189,19 +190,19 @@ int main() {
             }
         }
 
-        // 5. Delete a student record by Roll Number
+        // 5. Delete a student record by SAP ID
         else if (choice == 5) {
             if (n == 0) {
                 printf("\nNo records available to delete!\n");
             } else {
-                int delRoll;
+                long long delSapid;
                 int found = 0;
 
-                printf("\nEnter Roll Number of student to delete: ");
-                scanf("%d", &delRoll);
+                printf("\nEnter SAP ID of student to delete: ");
+                scanf("%lld", &delSapid);
 
                 for (i = 0; i < n; i++) {
-                    if (s[i].roll == delRoll) {
+                    if (s[i].sapid == delSapid) {
                         found = 1;
 
                         // Shift all remaining students one step to the left
@@ -214,14 +215,14 @@ int main() {
                         // Save updated array to file
                         saveToFile(s, n);
 
-                        printf("Student with Roll Number %d deleted successfully!\n", delRoll);
+                        printf("Student with SAP ID %lld deleted successfully!\n", delSapid);
                         printf("--> Updated records saved to 'students.txt'.\n");
                         break;
                     }
                 }
 
                 if (!found) {
-                    printf("Student with Roll Number %d not found!\n", delRoll);
+                    printf("Student with SAP ID %lld not found!\n", delSapid);
                 }
             }
         }
